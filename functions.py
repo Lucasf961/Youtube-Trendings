@@ -66,6 +66,7 @@ def ranktags_and_wordcloud_generator(dftags):
     from wordcloud import WordCloud
     from nltk.tokenize import RegexpTokenizer
     from nltk.corpus import stopwords
+    import nltk
     nltk.download('stopwords')
     
     _stopwords = []
