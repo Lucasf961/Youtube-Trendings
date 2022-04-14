@@ -5,7 +5,7 @@ def request_api(id_category = None, region_code = 'br'):
     import numpy as np
     import streamlit as st
 
-    key = st.secrets.api_key.api
+    key = st.secrets.api_key.key
     service_name = 'youtube'
     api_version = 'v3'
 
