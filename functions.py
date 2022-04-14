@@ -1,7 +1,6 @@
 ##### REQUEST NA API DO YOUTUBE / RETORNA UM DATAFRAME #####
 def request_api(id_category = None, region_code = 'br'):
     from googleapiclient.discovery import build
-    from datetime import date
     from pandas import DataFrame
     import numpy as np
     import json
@@ -66,72 +65,13 @@ def request_api(id_category = None, region_code = 'br'):
     api = DataFrame(data = data)
     return api
 
-##### FUNÇÃO QUE GERA UM DATA FRAME COM O RANKING DE TAGS NOS VÍDEOS #####
-
-
-    import numpy as np
-    from wordcloud import WordCloud
-    import matplotlib.pyplot as plt
-    from nltk.tokenize import RegexpTokenizer
-    from nltk.corpus import stopwords
-    import nltk
-    nltk.download('stopwords')
-    
-    _stopwords = []
-    for word in stopwords.words(['portuguese','english']):
-        _stopwords.append(word)
-    
-    # 1 - Desconsiderando valores NAN
-    not_nan = [i for i in dftags if i is not np.nan]
-
-    # 2 - Transformando listas em strings
-    string = [str(i) for i in not_nan]
-    
-    # 3 - Convertendo letras maiusculas para minusculas
-    lower = [i.lower() for i in string]
-    
-    # 4 - Split por vírgula. Ex: "Flamengo, Vasco, Botafogo" > "Flamengo", "Vasco", "Botafogo"
-    split = [i.split(',') for i in lower]
-    
-    # 5 - Filtrando apenas strings com letras(a-z)
-    tokenizer = RegexpTokenizer(r'\w+')
-    token = []
-    for i in split:
-        for x in i:
-            token.append(tokenizer.tokenize(x))
-        
-    # 6 - Juntando palavras compostas em uma string. Ex: "Campeonato Brasileiro" > "Campeonato_Brasileiro"
-    join = ['_'.join(i) for i in token]
-
-    # 7 - Filtrando palavras que não aparecem nas Stopwords
-    keywords = []
-    for lista in join:
-        if lista not in _stopwords:
-            keywords.append(lista)
-
-    wc = ' '.join(keywords)
-    wordcloud = WordCloud(
-        max_words=25,
-        collocations=False,
-        background_color='black', 
-        colormap='Set2',
-        margin=0,
-        ).generate(wc)
-    
-    #plt.figure(figsize=[8,10])
-    plt.imshow(wordcloud, interpolation='bilinear')
-    plt.axis("off")
-    plt.show()
-
 ##### RETORNA DATAFRAME E WORDCLOUD COM O RANKING DE TAGS #####
 def ranktags_and_wordcloud_generator(dftags):
     import pandas as pd
     import numpy as np
     from wordcloud import WordCloud
-    import matplotlib.pyplot as plt
     from nltk.tokenize import RegexpTokenizer
     from nltk.corpus import stopwords
-    import nltk
     
     _stopwords = []
     for word in stopwords.words(['portuguese','english','spanish','french']):
@@ -212,7 +152,5 @@ def plot_canais_destaque(df):
                                     tickfont_family='Open Sans'))
     
     return fig, top_canais
-
-
 
 

@@ -12,12 +12,12 @@ st.sidebar.markdown("**Primeiro ajuste os filtros de sua preferência:** 👇")
 lista_paises = ['Brasil','Portugal','Estados Unidos','Reino Unido','Espanha','França']
 option1 = st.sidebar.selectbox('Selecione o País de sua preferência:', lista_paises)
 
-lista_categorias = ['Geral (Em Alta) 🌐','Música 🎶','Jogos 🎮','Esportes ⚽','Entretenimento 🎡','Notícias e Política 📰']
+lista_categorias = ['Geral 🌐','Música 🎶','Jogos 🎮','Esportes ⚽','Entretenimento 🎡','Notícias e Política 📰']
 option2 = st.sidebar.selectbox('Selecione a categoria de sua preferência:', lista_categorias)
 
 codigo_categoria = None
 
-if option2 == 'Geral (Em Alta) 🌐':
+if option2 == 'Geral 🌐':
     codigo_categoria = None
 elif option2 == 'Música 🎶':
     codigo_categoria = 10
@@ -53,8 +53,8 @@ tabela_tags, wordcloud = ranktags_and_wordcloud_generator(yt_geral['Tags'])
 title = '<span style="color:#DE0F0F; font-size: 45px;"><b>YouTube</b></span><span style="color:#252121; font-size: 45px;"><b>Trending</b></span>'
 st.markdown(title, unsafe_allow_html=True)
 
-st.markdown("Streamlit App atualizado em tempo real com os [50 vídeos em Alta do Youtube](https://www.youtube.com/feed/trending?bp=6gQJRkVleHBsb3Jl), utilizando a [API](https://developers.google.com/youtube/v3) disponibilizada pelo Google.")
-st.markdown("Repositório do código disponível no [Github](https://github.com/Lucasf961/Youtube).")
+st.markdown("Streamlit App Real Time com os [50 vídeos no 'em Alta'](https://www.youtube.com/feed/trending?bp=6gQJRkVleHBsb3Jl), utilizando a [API](https://developers.google.com/youtube/v3) disponibilizada pelo Youtube.")
+st.markdown("Repositório do código disponível no [Github](https://github.com/Lucasf961/Youtube-Trendings).")
 
 st.text('')
 subt = '<span style="color:#252121; font-size: 20px;">Quais assuntos</span> <span style="color:#DE0F0F; font-size: 20px;"><b>em Alta</b></span> <span style="color:#252121; font-size: 20px;"> agora? 📈</span>'
