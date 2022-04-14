@@ -53,11 +53,15 @@ tabela_tags, wordcloud = ranktags_and_wordcloud_generator(yt_geral['Tags'])
 title = '<span style="color:#DE0F0F; font-size: 45px;"><b>YouTube</b></span><span style="color:#252121; font-size: 45px;"><b>Trending</b></span>'
 st.markdown(title, unsafe_allow_html=True)
 
+st.markdown("Streamlit App atualizado em tempo real com os [50 vídeos em Alta do Youtube](https://www.youtube.com/feed/trending?bp=6gQJRkVleHBsb3Jl), utilizando a [API](https://developers.google.com/youtube/v3) disponibilizada pelo Google.")
+st.markdown("Repositório do código disponível no [Github](https://github.com/Lucasf961/Youtube).")
+
+st.text('')
 subt = '<span style="color:#252121; font-size: 20px;">Quais assuntos</span> <span style="color:#DE0F0F; font-size: 20px;"><b>em Alta</b></span> <span style="color:#252121; font-size: 20px;"> agora? 📈</span>'
 st.markdown(subt, unsafe_allow_html=True)
 
 #### WORDCLOUD/TABELA ####
-col1, col2_space, col3 = st.columns([3.8,0.5,2.8])
+col1, col2_space, col3 = st.columns([4.5,0.5,2.9])
 with col1:
     fig = plt.figure()
     fig.set_facecolor('xkcd:white')
@@ -81,8 +85,9 @@ with col3:
 
 #### TABELA VIDEOS EM ALTA ####
 st.text('')
-subt = '<span style="color:#252121; font-size: 20px;">Vídeos</span> <span style="color:#DE0F0F; font-size: 20px;"><b>em Alta</b></span> <span style="color:#252121; font-size: 20px;">no Momento 🎥</span> '
-st.markdown(subt, unsafe_allow_html=True)
+st.text('')
+subtitle2 = '<span style="color:#252121; font-size: 20px;">Vídeos</span> <span style="color:#DE0F0F; font-size: 20px;"><b>em Alta</b></span> <span style="color:#252121; font-size: 20px;">no Momento 🎥</span> '
+st.markdown(subtitle2, unsafe_allow_html=True)
 
 row_1, row_space, row_2, row_space2 = st.columns((1,.1, 1, 1))
 with row_1:
@@ -126,8 +131,9 @@ st.table(tb.head(10))
 
 #### CANAIS ####
 st.text('')
-subt = '<p style="color:#252121; font-size: 20px;">Algum Canal se Destaca? 📺</p>'
-st.markdown(subt, unsafe_allow_html=True)
+st.text('')
+subtitle3 = '<p style="color:#252121; font-size: 20px;">Algum Canal se Destaca? 📺</p>'
+st.markdown(subtitle3, unsafe_allow_html=True)
 
 col1, col2_space, col3 = st.columns([2,0.5,1])
 with col1:
