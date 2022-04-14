@@ -1,6 +1,5 @@
 ##### REQUEST NA API DO YOUTUBE / RETORNA UM DATAFRAME #####
-
-def request_api(id_category = None):
+def request_api(id_category = None, region_code = 'br'):
     from googleapiclient.discovery import build
     from datetime import date
     from pandas import DataFrame
@@ -18,27 +17,18 @@ def request_api(id_category = None):
     api_version = 'v3'
 
     youtube = build(serviceName = service_name, version = api_version, developerKey = key)
-    request = youtube.videos().list(part = ['snippet','statistics'], videoCategoryId = id_category, maxResults=50, chart = 'mostPopular', regionCode = 'br')
+    request = youtube.videos().list(part = ['snippet','statistics'], videoCategoryId = id_category, maxResults=50, chart = 'mostPopular', regionCode = region_code)
     response = request.execute()
-
-    id_video = []
-    data_publicacao = []
+    
     titulo = []
     n_views = []
     n_likes = []
-    n_comments = []
-    id_canal = []
-    thumbnail_image = []
     nome_canal = []
     id_categoria = []
     tags = []
 
     for i in range(0, len(response['items'])):
-        id_video.append(response['items'][i]['id'])
-        data_publicacao.append(response['items'][i]['snippet']['publishedAt'])
         titulo.append(response['items'][i]['snippet']['title'])
-        id_canal.append(response['items'][i]['snippet']['channelId'])
-        thumbnail_image.append(response['items'][i]['snippet']['thumbnails']['default']['url'])
         nome_canal.append(response['items'][i]['snippet']['channelTitle'])
         
         try:
@@ -55,11 +45,6 @@ def request_api(id_category = None):
             n_likes.append(response['items'][i]['statistics']['likeCount'])
         except:
             n_likes.append(np.nan)
-            
-        try:
-            n_comments.append(response['items'][i]['statistics']['commentCount'])
-        except:
-            n_comments.append(np.nan)
         
         try:
             id_categoria.append(response['items'][i]['snippet']['categoryId'])
@@ -67,78 +52,23 @@ def request_api(id_category = None):
             id_categoria.append(np.nan)
             
     ranking = []
-    for i in list(range(1,len(id_video) + 1)):
+    for i in list(range(1,len(titulo) + 1)):
         ranking.append("#"+str(i))
     
-    data = {'ranking': ranking,
-            'id_video':id_video,
-            'data_publicacao':data_publicacao,
-            'titulo':titulo,
-            'id_canal':id_canal,
-            'n_views':n_views,
-            'n_likes':n_likes,
-            'n_comments':n_comments,
-            'thumbnail':thumbnail_image, 
-            'nome_canal':nome_canal, 
-            'id_categoria':id_categoria, 
-            'tags':tags}
+    data = {'Ranking do Em Alta do Youtube': ranking,
+            'Título do Vídeo':titulo,
+            'Nome do Canal':nome_canal,
+            'ID da Categoria':id_categoria,
+            'Número de Views':n_views,
+            'Número de Likes':n_likes,
+            'Tags':tags}
     
     api = DataFrame(data = data)
     return api
 
 ##### FUNÇÃO QUE GERA UM DATA FRAME COM O RANKING DE TAGS NOS VÍDEOS #####
 
-def ranking_tags(dftags):
-    import pandas as pd
-    import numpy as np
-    from nltk.tokenize import RegexpTokenizer
-    from nltk.corpus import stopwords
-    import nltk
-    nltk.download('stopwords')
 
-    _stopwords = []
-    for word in stopwords.words(['portuguese','english']):
-        _stopwords.append(word)
-    
-    # 1 - Desconsiderando valores NAN
-    not_nan = [i for i in dftags if i is not np.nan]
-
-    # 2 - Transformando listas em strings
-    string = [str(i) for i in not_nan]
-    
-    # 3 - Convertendo letras maiusculas para minusculas
-    lower = [i.lower() for i in string]
-    
-    # 4 - Split por vírgula. Ex: "Flamengo, Vasco, Botafogo" > "Flamengo", "Vasco", "Botafogo"
-    split = [i.split(',') for i in lower]
-    
-    # 5 - Filtrando apenas strings com letras(a-z)
-    tokenizer = RegexpTokenizer(r'\w+')
-    token = []
-    for i in split:
-        for x in i:
-            token.append(tokenizer.tokenize(x))
-        
-    # 6 - Juntando palavras compostas em uma string. Ex: "Campeonato Brasileiro" > "Campeonato_Brasileiro"
-    join = ['_'.join(i) for i in token]
-
-    # 7 - Filtrando palavras que não aparecem nas Stopwords
-    keywords = []
-    for lista in join:
-        if lista not in _stopwords:
-            keywords.append(lista)
-    
-    # 8 - Ranking
-    ranking=dict(zip(list(keywords),[list(keywords).count(i) for i in list(keywords)]))
-    
-    # DataFrame
-    df_final = pd.DataFrame(ranking.items(), columns = ['tags', 'contagem'])
-    
-    return df_final.sort_values(by = 'contagem', ascending = False).reset_index(drop = True)
-
-##### FUNÇÃO QUE GERA NUVEM DE PALAVRAS #####
-
-def word_cloud_tags(dftags):
     import numpy as np
     from wordcloud import WordCloud
     import matplotlib.pyplot as plt
@@ -180,44 +110,108 @@ def word_cloud_tags(dftags):
             keywords.append(lista)
 
     wc = ' '.join(keywords)
-    wordcloud = WordCloud(collocations=False, background_color='black').generate(wc)
-
+    wordcloud = WordCloud(
+        max_words=25,
+        collocations=False,
+        background_color='black', 
+        colormap='Set2',
+        margin=0,
+        ).generate(wc)
+    
+    #plt.figure(figsize=[8,10])
     plt.imshow(wordcloud, interpolation='bilinear')
     plt.axis("off")
     plt.show()
 
-##### FUNÇÃO QUE PLOTA O GRÁFICO DE BARRAS #####
-
-def bar_plot_categorias(df):
-    import matplotlib.pyplot as plt
+##### RETORNA DATAFRAME E WORDCLOUD COM O RANKING DE TAGS #####
+def ranktags_and_wordcloud_generator(dftags):
     import pandas as pd
-    import seaborn as sns
+    import numpy as np
+    from wordcloud import WordCloud
+    import matplotlib.pyplot as plt
+    from nltk.tokenize import RegexpTokenizer
+    from nltk.corpus import stopwords
+    import nltk
     
-    cat = df.groupby('category_name').size().sort_values(ascending = False).reset_index().rename(columns = {0:'count'})
+    _stopwords = []
+    for word in stopwords.words(['portuguese','english','spanish','french']):
+        _stopwords.append(word)
+    
+    # 1 - Desconsiderando valores NAN
+    not_nan = [i for i in dftags if i is not np.nan]
 
-    rc = {'figure.figsize':(10,6),
-            'axes.facecolor':'#0e1117',
-            'axes.edgecolor': '#0e1117',
-            'axes.labelcolor': 'white',
-            'figure.facecolor': '#0e1117',
-            'patch.edgecolor': '#0e1117',
-            'text.color': 'white',
-            'xtick.color': 'white',
-            'ytick.color': 'white',
-            'grid.color': 'grey',
-            'font.size' : 12,
-            'axes.labelsize': 12,
-            'xtick.labelsize': 12,
-            'ytick.labelsize': 12}
-    plt.rcParams.update(rc)
-    fig, ax = plt.subplots()
+    # 2 - Transformando listas em strings
+    string = [str(i) for i in not_nan]
+    
+    # 3 - Convertendo letras maiusculas para minusculas
+    lower = [i.lower() for i in string]
+    
+    # 4 - Split por vírgula. Ex: "Flamengo, Vasco, Botafogo" > "Flamengo", "Vasco", "Botafogo"
+    split = [i.split(',') for i in lower]
+    
+    # 5 - Filtrando apenas strings com letras(a-z)
+    tokenizer = RegexpTokenizer(r'\w+')
+    token = []
+    for i in split:
+        for x in i:
+            token.append(tokenizer.tokenize(x))
+        
+    # 6 - Juntando palavras compostas em uma string. Ex: "Campeonato Brasileiro" > "Campeonato_Brasileiro"
+    join = ['_'.join(i) for i in token]
 
-    ax = sns.barplot(y='category_name', x='count', data=cat, color = "#D90F0F")
+    # 7 - Filtrando palavras que não aparecem nas Stopwords
+    keywords = []
+    for lista in join:
+        if lista not in _stopwords:
+            keywords.append(lista)
+            
+    # 8 - Ranking
+    ranking=dict(zip(list(keywords),[list(keywords).count(i) for i in list(keywords)]))
+    
+    # 9 - DataFrame
+    df_final = pd.DataFrame(ranking.items(), columns = ['Tags', 'Contagem'])
+    rank = df_final.sort_values(by = 'Contagem', ascending = False).reset_index(drop = True)
+    tops = rank[rank['Contagem'] >= 3]
+    
+    # 10 - wordcloud
+    words = [word for word in keywords if word in tops['Tags'].tolist()]
+    wc = ' '.join(words)
+    wordcloud = WordCloud(collocations=False, height= 325, mode = "RGBA", background_color=None, colormap='inferno').generate(wc)
+    
+    return tops, wordcloud
 
-    ax.set(xlabel = 'Contagem', ylabel = 'Categoria')
+##### RETORNA A TABELA #####
+def plot_table(df):
+    videos = df[['Ranking do Em Alta do Youtube','Título do Vídeo','Nome do Canal','Número de Views','Número de Likes']]
+    
+    videos.fillna(0, inplace = True)
+    
+    videos['Número de Views'] = videos['Número de Views'].astype('int')
+    videos['Número de Likes'] = videos['Número de Likes'].astype('int')
+    
+    videos['Views a cada Like'] = round(videos['Número de Views'] / videos['Número de Likes'] , 2)
+    
+    return videos
 
-    plt.show()
+##### FUNÇÃO QUE PLOTA O GRÁFICO DE BARRAS #####
+def plot_canais_destaque(df):
+    import plotly.express as px
+    canais = df.groupby('Nome do Canal').size().sort_values(ascending = False).reset_index().rename(columns = {0:'Contagem de Aparições'})
+    
+    top_canais = canais[canais['Contagem de Aparições'] > 1]
 
+    fig = px.bar(top_canais, x='Nome do Canal', y='Contagem de Aparições',
+                 text_auto='.0s',
+                 labels=dict(nome_canal="Nome do Canal", count='Contagem de aparições'))
+
+    fig.update_traces(marker_color = '#CD1414', textfont_size=20, textangle=0, textposition="inside")
+
+    fig.update_layout(plot_bgcolor='white',
+                      yaxis = dict(visible = False), 
+                      xaxis =  dict(tickfont_size=14,
+                                    tickfont_family='Open Sans'))
+    
+    return fig, top_canais
 
 
 

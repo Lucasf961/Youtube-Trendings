@@ -130,3 +130,6 @@ dmypy.json
 
 # Api-Key
 key.json
+
+# Jupyter
+Untitled.ipynb
