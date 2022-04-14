@@ -3,15 +3,9 @@ def request_api(id_category = None, region_code = 'br'):
     from googleapiclient.discovery import build
     from pandas import DataFrame
     import numpy as np
-    import json
+    import streamlit as st
 
-    with open('key.json', 'r') as file:
-        data = file.read()
-
-    dictionary = json.loads(data)
-    value = list(dictionary.values())
-
-    key = value
+    key = st.secrets.api_key.api
     service_name = 'youtube'
     api_version = 'v3'
 
